@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Binom</title>
+<style>
+  :root { color-scheme: light dark; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    gap: 24px;
+    padding: 24px;
+    box-sizing: border-box;
+  }
+  input[type="date"] {
+    font-size: 1.2rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #888;
+  }
+  #result {
+    font-size: 4rem;
+    font-weight: 700;
+    min-height: 1.2em;
+  }
+  hr {
+    width: 100%;
+    max-width: 320px;
+    border: none;
+    border-top: 1px solid #888;
+  }
+  #openPoint {
+    text-align: center;
+    line-height: 1.6;
+  }
+  #openPoint .meta {
+    opacity: 0.7;
+    font-size: 0.9rem;
+  }
+  #openPoint .row {
+    font-size: 1.2rem;
+  }
+</style>
+</head>
+<body>
+  <input type="date" id="dateInput">
+  <div id="result"></div>
+
+  <hr>
+
+  <div id="openPoint"></div>
+
+  <script src="binom.js"></script>
+  <script src="openpoint.js"></script>
+  <script>
+    const dateInput = document.getElementById('dateInput');
+    const result = document.getElementById('result');
+    const openPointEl = document.getElementById('openPoint');
+
+    function renderAll() {
+      if (!dateInput.value) {
+        result.textContent = '';
+        openPointEl.innerHTML = '';
+        return;
+      }
+      const [y, m, d] = dateInput.value.split('-').map(Number);
+      result.textContent = getBinom(new Date(y, m - 1, d));
+
+      const p = getOpenPointNow({ year: y, month: m, day: d });
+      openPointEl.innerHTML = `
+        <div class="meta">Prague time ${p.pragueTime} (${p.isSummer ? 'summer' : 'winter'}) · heaven stem ${p.heavenStem} · meridian ${p.meridianLetter} – ${p.organ}</div>
+        <div class="row">Woman: point ${p.point} on meridian ${p.meridianLetter}, ${p.woman}</div>
+        <div class="row">Man: point ${p.point} on meridian ${p.meridianLetter}, ${p.man}</div>
+      `;
+    }
+
+    dateInput.addEventListener('input', renderAll);
+
+    const today = new Date();
+    dateInput.value = today.toISOString().slice(0, 10);
+    renderAll();
+    setInterval(renderAll, 1000);
+  </script>
+</body>
+</html>
