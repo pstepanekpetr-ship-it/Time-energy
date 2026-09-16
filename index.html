@@ -1,16 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Binom</title>
-<style>
-  :root { color-scheme: light dark; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
     min-height: 100vh;
     margin: 0;
@@ -34,3 +21,26 @@
 <body>
   <input type="date" id="dateInput">
   <div id="result"></div>
+
+  <script src="binom.js"></script>
+  <script>
+    const dateInput = document.getElementById('dateInput');
+    const result = document.getElementById('result');
+
+    function render() {
+      if (!dateInput.value) {
+        result.textContent = '';
+        return;
+      }
+      const [y, m, d] = dateInput.value.split('-').map(Number);
+      result.textContent = getBinom(new Date(y, m - 1, d));
+    }
+
+    dateInput.addEventListener('input', render);
+
+    const today = new Date();
+    dateInput.value = today.toISOString().slice(0, 10);
+    render();
+  </script>
+</body>
+</html>
