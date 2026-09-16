@@ -1,19 +1,26 @@
 // "Open point" lookup table — Su Jok healing method.
 // Row order matches HEAVEN_STEM_CYCLE column order (K, L, F, E, C, D, B, A, G, H).
+// summerRange/winterRange are [startHour, endHour] in 24h Prague local time;
+// endHour may be <= startHour to mean it wraps past midnight.
 const BYOL_ROWS = [
-  { letter: 'k', organEn: 'gallbladder', values: ['S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5'] },
-  { letter: 'l', organEn: 'liver', values: ['N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5'] },
-  { letter: 'a', organEn: 'lungs', values: ['N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1'] },
-  { letter: 'b', organEn: 'large intestine', values: ['S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1'] },
-  { letter: 'c', organEn: 'stomach', values: ['S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2'] },
-  { letter: 'd', organEn: 'pancreas/spleen', values: ['N-3', 'S-4', 'N-5', 'S-1', 'S-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2'] },
-  { letter: 'e', organEn: 'heart', values: ['N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3'] },
-  { letter: 'f', organEn: 'small intestine', values: ['S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3'] },
-  { letter: 'g', organEn: 'urinary bladder', values: ['S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4'] },
-  { letter: 'h', organEn: 'kidney', values: ['N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4'] },
-  { letter: 'i', organEn: 'brain', values: ['N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5'] },
-  { letter: 'j', organEn: 'spinal cord', values: ['S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5'] },
+  { letter: 'k', organEn: 'gallbladder', summerRange: [0, 2], winterRange: [23, 1], values: ['S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5'] },
+  { letter: 'l', organEn: 'liver', summerRange: [2, 4], winterRange: [1, 3], values: ['N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5'] },
+  { letter: 'a', organEn: 'lungs', summerRange: [4, 6], winterRange: [3, 5], values: ['N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1'] },
+  { letter: 'b', organEn: 'large intestine', summerRange: [6, 8], winterRange: [5, 7], values: ['S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1'] },
+  { letter: 'c', organEn: 'stomach', summerRange: [8, 10], winterRange: [7, 9], values: ['S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2'] },
+  { letter: 'd', organEn: 'pancreas/spleen', summerRange: [10, 12], winterRange: [9, 11], values: ['N-3', 'S-4', 'N-5', 'S-1', 'S-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2'] },
+  { letter: 'e', organEn: 'heart', summerRange: [12, 14], winterRange: [11, 13], values: ['N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3'] },
+  { letter: 'f', organEn: 'small intestine', summerRange: [14, 16], winterRange: [13, 15], values: ['S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3'] },
+  { letter: 'g', organEn: 'urinary bladder', summerRange: [16, 18], winterRange: [15, 17], values: ['S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4'] },
+  { letter: 'h', organEn: 'kidney', summerRange: [18, 20], winterRange: [17, 19], values: ['N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4'] },
+  { letter: 'i', organEn: 'brain', summerRange: [20, 22], winterRange: [19, 21], values: ['N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5'] },
+  { letter: 'j', organEn: 'spinal cord', summerRange: [22, 24], winterRange: [21, 23], values: ['S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5'] },
 ];
+
+function formatHourRange([start, end]) {
+  const fmt = (h) => `${String(h % 24).padStart(2, '0')}:00`;
+  return `${fmt(start)}–${fmt(end)}`;
+}
 
 const PRAGUE_TIME_ZONE = 'Europe/Prague';
 
@@ -75,6 +82,7 @@ function getOpenPointNow(civilDateOverride) {
   const point = parseInt(pointStr, 10);
   const woman = matchLetter === 'S' ? 'right hand' : 'left hand';
   const man = matchLetter === 'S' ? 'left hand' : 'right hand';
+  const activeRange = formatHourRange(isSummer ? row.summerRange : row.winterRange);
 
   return {
     pragueTime: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
@@ -83,6 +91,7 @@ function getOpenPointNow(civilDateOverride) {
     heavenStem,
     meridianLetter: row.letter,
     organ: row.organEn,
+    activeRange,
     match: matchLetter,
     point,
     woman,
