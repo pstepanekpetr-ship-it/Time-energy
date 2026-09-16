@@ -46,6 +46,8 @@
   #openPoint .row {
     font-size: 1.2rem;
   }
+  .female { color: #ff69b4; }
+  .male { color: #7ec8f2; }
   #diagrams {
     display: flex;
     gap: 24px;
@@ -57,6 +59,11 @@
   }
   .diagramCard .label {
     font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .fingerMeta {
+    font-size: 0.8rem;
+    opacity: 0.7;
     margin-bottom: 4px;
   }
   .fingerImg {
@@ -112,8 +119,8 @@
       const p = getOpenPointNow({ year: y, month: m, day: d });
       openPointEl.innerHTML = `
         <div class="meta">Prague time ${p.pragueTime} (${p.isSummer ? 'summer' : 'winter'}) · heaven stem ${p.heavenStem} · meridian ${p.meridianLetter} – ${p.organ} · active ${p.activeRange}</div>
-        <div class="row">Woman: point ${p.point} on meridian ${p.meridianLetter}, ${p.woman}</div>
-        <div class="row">Man: point ${p.point} on meridian ${p.meridianLetter}, ${p.man}</div>
+        <div class="row"><span class="female">&#9792;</span> point ${p.point} on meridian ${p.meridianLetter}, ${p.woman}</div>
+        <div class="row"><span class="male">&#9794;</span> point ${p.point} on meridian ${p.meridianLetter}, ${p.man}</div>
       `;
 
       const womanHand = p.match === 'S' ? 'right' : 'left';
@@ -121,10 +128,11 @@
       const womanInfo = getFingerDiagramInfo(p.meridianLetter, p.point, womanHand);
       const manInfo = getFingerDiagramInfo(p.meridianLetter, p.point, manHand);
 
-      function fingerCard(label, info) {
+      function fingerCard(symbol, cssClass, info) {
         return `
           <div class="diagramCard">
-            <div class="label">${label} (${info.hand} hand)</div>
+            <div class="label"><span class="${cssClass}">${symbol}</span> (${info.hand} hand)</div>
+            <div class="fingerMeta">${info.aspectEn} · ${info.finger} finger</div>
             <div class="fingerImg">
               <img src="${info.image}" alt="${info.aspectEn} ${info.finger} finger">
               <div class="pointCircle" style="left:${info.xPercent}%; top:${info.yPercent}%;"></div>
@@ -133,7 +141,7 @@
         `;
       }
 
-      diagramsEl.innerHTML = fingerCard('Woman', womanInfo) + fingerCard('Man', manInfo);
+      diagramsEl.innerHTML = fingerCard('&#9792;', 'female', womanInfo) + fingerCard('&#9794;', 'male', manInfo);
     }
 
     dateInput.addEventListener('input', renderAll);
