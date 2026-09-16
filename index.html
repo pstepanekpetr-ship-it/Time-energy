@@ -46,6 +46,39 @@
   #openPoint .row {
     font-size: 1.2rem;
   }
+  #diagrams {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .diagramCard {
+    text-align: center;
+  }
+  .diagramCard .label {
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .fingerImg {
+    position: relative;
+    width: 140px;
+    overflow: hidden;
+  }
+  .fingerImg img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .fingerImg .pointCircle {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    margin-left: -14px;
+    margin-top: -14px;
+    border: 3px solid #e11d2e;
+    border-radius: 50%;
+    box-sizing: border-box;
+  }
 </style>
 </head>
 <body>
@@ -55,18 +88,22 @@
   <hr>
 
   <div id="openPoint"></div>
+  <div id="diagrams"></div>
 
   <script src="binom.js"></script>
   <script src="openpoint.js"></script>
+  <script src="fingerdiagram.js"></script>
   <script>
     const dateInput = document.getElementById('dateInput');
     const result = document.getElementById('result');
     const openPointEl = document.getElementById('openPoint');
+    const diagramsEl = document.getElementById('diagrams');
 
     function renderAll() {
       if (!dateInput.value) {
         result.textContent = '';
         openPointEl.innerHTML = '';
+        diagramsEl.innerHTML = '';
         return;
       }
       const [y, m, d] = dateInput.value.split('-').map(Number);
@@ -78,6 +115,25 @@
         <div class="row">Woman: point ${p.point} on meridian ${p.meridianLetter}, ${p.woman}</div>
         <div class="row">Man: point ${p.point} on meridian ${p.meridianLetter}, ${p.man}</div>
       `;
+
+      const womanHand = p.match === 'S' ? 'right' : 'left';
+      const manHand = womanHand === 'right' ? 'left' : 'right';
+      const womanInfo = getFingerDiagramInfo(p.meridianLetter, p.point, womanHand);
+      const manInfo = getFingerDiagramInfo(p.meridianLetter, p.point, manHand);
+
+      function fingerCard(label, info) {
+        return `
+          <div class="diagramCard">
+            <div class="label">${label} (${info.hand} hand)</div>
+            <div class="fingerImg">
+              <img src="${info.image}" alt="${info.aspectEn} ${info.finger} finger">
+              <div class="pointCircle" style="left:${info.xPercent}%; top:${info.yPercent}%;"></div>
+            </div>
+          </div>
+        `;
+      }
+
+      diagramsEl.innerHTML = fingerCard('Woman', womanInfo) + fingerCard('Man', manInfo);
     }
 
     dateInput.addEventListener('input', renderAll);
