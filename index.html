@@ -7,6 +7,7 @@
 <style>
   :root { color-scheme: light dark; }
   body {
+    position: relative;
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
     display: flex;
     flex-direction: column;
@@ -17,6 +18,39 @@
     gap: 24px;
     padding: 24px;
     box-sizing: border-box;
+  }
+  #langSwitch {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    display: flex;
+    gap: 4px;
+  }
+  #langSwitch button {
+    font-size: 1rem;
+    background: none;
+    border: none;
+    padding: 2px;
+    border-radius: 4px;
+    cursor: pointer;
+    opacity: 0.4;
+    line-height: 1;
+  }
+  #langSwitch button.active {
+    opacity: 1;
+    outline: 1.5px solid #888;
+  }
+  #genderFilter {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    font-size: 1.1rem;
+  }
+  #genderFilter label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
   }
   input[type="date"] {
     font-size: 1.2rem;
@@ -89,8 +123,18 @@
 </style>
 </head>
 <body>
+  <div id="langSwitch">
+    <button type="button" data-lang="en">🇬🇧</button>
+    <button type="button" data-lang="cs">🇨🇿</button>
+  </div>
+
   <input type="date" id="dateInput">
   <div id="result"></div>
+
+  <div id="genderFilter">
+    <label><input type="radio" name="genderFilter" value="woman"> <span class="female">&#9792;</span></label>
+    <label><input type="radio" name="genderFilter" value="man"> <span class="male">&#9794;</span></label>
+  </div>
 
   <hr>
 
@@ -101,48 +145,123 @@
   <script src="openpoint.js"></script>
   <script src="fingerdiagram.js"></script>
   <script>
+    const I18N = {
+      en: {
+        pragueTime: 'Prague time', heavenStem: 'heaven stem', meridian: 'meridian', active: 'active',
+        summer: 'summer', winter: 'winter', point: 'point', onMeridian: 'on meridian', hand: 'hand',
+        left: 'left', right: 'right', palmar: 'palmar', dorsal: 'dorsal', index: 'index', middle: 'middle', fingerWord: 'finger',
+      },
+      cs: {
+        pragueTime: 'Pražský čas', heavenStem: 'nebeský kmen', meridian: 'meridián', active: 'aktivní',
+        summer: 'letní', winter: 'zimní', point: 'bod', onMeridian: 'na meridiánu', hand: 'ruka',
+        left: 'levá', right: 'pravá', palmar: 'dlaňová strana', dorsal: 'hřbetní strana', index: 'ukazovák', middle: 'prostředník', fingerWord: '',
+      },
+    };
+
+    function detectLang() {
+      const stored = localStorage.getItem('lang');
+      if (stored) return stored;
+      const primary = (navigator.language || '').toLowerCase();
+      return primary.startsWith('cs') ? 'cs' : 'en';
+    }
+
+    let lang = detectLang();
+
+    function handText(hand) {
+      const t = I18N[lang];
+      const side = hand === 'right' ? t.right : t.left;
+      return `${side} ${t.hand}`;
+    }
+
+    function fingerCaption(info) {
+      const t = I18N[lang];
+      const aspect = info.aspectEn === 'palmar' ? t.palmar : t.dorsal;
+      const finger = info.finger === 'index' ? t.index : t.middle;
+      return t.fingerWord ? `${aspect} · ${finger} ${t.fingerWord}` : `${aspect} · ${finger}`;
+    }
+
     const dateInput = document.getElementById('dateInput');
     const result = document.getElementById('result');
     const openPointEl = document.getElementById('openPoint');
     const diagramsEl = document.getElementById('diagrams');
+    const langButtons = document.querySelectorAll('#langSwitch button');
+    const genderRadios = document.querySelectorAll('#genderFilter input[type="radio"]');
+    let genderFilter = null; // null = both, otherwise 'woman' or 'man'
 
     function renderAll() {
+      langButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.lang === lang));
+
       if (!dateInput.value) {
         result.textContent = '';
         openPointEl.innerHTML = '';
         diagramsEl.innerHTML = '';
         return;
       }
+      const t = I18N[lang];
       const [y, m, d] = dateInput.value.split('-').map(Number);
       result.textContent = getBinom(new Date(y, m - 1, d));
 
       const p = getOpenPointNow({ year: y, month: m, day: d });
-      openPointEl.innerHTML = `
-        <div class="meta">Prague time ${p.pragueTime} (${p.isSummer ? 'summer' : 'winter'}) · heaven stem ${p.heavenStem} · meridian ${p.meridianLetter} – ${p.organ} · active ${p.activeRange}</div>
-        <div class="row"><span class="female">&#9792;</span> point ${p.point} on meridian ${p.meridianLetter}, ${p.woman}</div>
-        <div class="row"><span class="male">&#9794;</span> point ${p.point} on meridian ${p.meridianLetter}, ${p.man}</div>
-      `;
+      const organ = lang === 'cs' ? p.organCs : p.organ;
+      const seasonWord = p.isSummer ? t.summer : t.winter;
 
       const womanHand = p.match === 'S' ? 'right' : 'left';
       const manHand = womanHand === 'right' ? 'left' : 'right';
-      const womanInfo = getFingerDiagramInfo(p.meridianLetter, p.point, womanHand);
-      const manInfo = getFingerDiagramInfo(p.meridianLetter, p.point, manHand);
+
+      const rows = [];
+      if (genderFilter !== 'man') {
+        rows.push(`<div class="row"><span class="female">&#9792;</span> ${t.point} ${p.point} ${t.onMeridian} ${p.meridianLetter}, ${handText(womanHand)}</div>`);
+      }
+      if (genderFilter !== 'woman') {
+        rows.push(`<div class="row"><span class="male">&#9794;</span> ${t.point} ${p.point} ${t.onMeridian} ${p.meridianLetter}, ${handText(manHand)}</div>`);
+      }
+      openPointEl.innerHTML = `
+        <div class="meta">${t.pragueTime} ${p.pragueTime} (${seasonWord}) · ${t.heavenStem} ${p.heavenStem} · ${t.meridian} ${p.meridianLetter} – ${organ} · ${t.active} ${p.activeRange}</div>
+        ${rows.join('')}
+      `;
 
       function fingerCard(symbol, cssClass, info) {
         return `
           <div class="diagramCard">
-            <div class="label"><span class="${cssClass}">${symbol}</span> (${info.hand} hand)</div>
-            <div class="fingerMeta">${info.aspectEn} · ${info.finger} finger</div>
+            <div class="label"><span class="${cssClass}">${symbol}</span> (${handText(info.hand)})</div>
+            <div class="fingerMeta">${fingerCaption(info)}</div>
             <div class="fingerImg">
-              <img src="${info.image}" alt="${info.aspectEn} ${info.finger} finger">
+              <img src="${info.image}" alt="${fingerCaption(info)}">
               <div class="pointCircle" style="left:${info.xPercent}%; top:${info.yPercent}%;"></div>
             </div>
           </div>
         `;
       }
 
-      diagramsEl.innerHTML = fingerCard('&#9792;', 'female', womanInfo) + fingerCard('&#9794;', 'male', manInfo);
+      const cards = [];
+      if (genderFilter !== 'man') {
+        cards.push(fingerCard('&#9792;', 'female', getFingerDiagramInfo(p.meridianLetter, p.point, womanHand)));
+      }
+      if (genderFilter !== 'woman') {
+        cards.push(fingerCard('&#9794;', 'male', getFingerDiagramInfo(p.meridianLetter, p.point, manHand)));
+      }
+      diagramsEl.innerHTML = cards.join('');
     }
+
+    langButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        lang = btn.dataset.lang;
+        localStorage.setItem('lang', lang);
+        renderAll();
+      });
+    });
+
+    genderRadios.forEach((radio) => {
+      radio.addEventListener('click', () => {
+        if (genderFilter === radio.value) {
+          radio.checked = false;
+          genderFilter = null;
+        } else {
+          genderFilter = radio.value;
+        }
+        renderAll();
+      });
+    });
 
     dateInput.addEventListener('input', renderAll);
 
