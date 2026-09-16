@@ -22,7 +22,7 @@ function getPragueDateTimeParts(date) {
     new Intl.DateTimeFormat('en-US', {
       timeZone: PRAGUE_TIME_ZONE,
       year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', hour12: false,
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
     }).formatToParts(date).map((p) => [p.type, p.value])
   );
 
@@ -35,18 +35,20 @@ function getPragueDateTimeParts(date) {
     day: parseInt(parts.day, 10),
     hour,
     minute: parseInt(parts.minute, 10),
+    second: parseInt(parts.second, 10),
   };
 }
 
-function isPragueSummerTime(date) {
-  const offsetPart = new Intl.DateTimeFormat('en-US', {
-    timeZone: PRAGUE_TIME_ZONE,
-    timeZoneName: 'shortOffset',
-  }).formatToParts(date).find((p) => p.type === 'timeZoneName');
-
-  const match = offsetPart && offsetPart.value.match(/GMT([+-]\d+)/);
-  const offsetHours = match ? parseInt(match[1], 10) : 1;
-  return offsetHours === 2;
+// Derives Prague's current UTC offset by comparing its wall-clock reading against
+// the instant's actual UTC time — avoids relying on Intl's timeZoneName formatting,
+// which is inconsistent across browsers (notably older Safari).
+function getPragueUtcOffsetHours(date, pragueParts) {
+  const utcMillisOfPragueWallClock = Date.UTC(
+    pragueParts.year, pragueParts.month - 1, pragueParts.day,
+    pragueParts.hour, pragueParts.minute, pragueParts.second
+  );
+  const offsetMs = utcMillisOfPragueWallClock - date.getTime();
+  return Math.round(offsetMs / 3600000);
 }
 
 // Returns the open-point result for the current time in Prague.
@@ -54,8 +56,8 @@ function isPragueSummerTime(date) {
 // heaven stem while still using the real current Prague time of day.
 function getOpenPointNow(civilDateOverride) {
   const now = new Date();
-  const { year, month, day, hour, minute } = getPragueDateTimeParts(now);
-  const isSummer = isPragueSummerTime(now);
+  const { year, month, day, hour, minute, second } = getPragueDateTimeParts(now);
+  const isSummer = getPragueUtcOffsetHours(now, { year, month, day, hour, minute, second }) === 2;
 
   const civilDate = civilDateOverride
     ? new Date(civilDateOverride.year, civilDateOverride.month - 1, civilDateOverride.day)
