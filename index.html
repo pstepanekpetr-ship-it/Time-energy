@@ -61,26 +61,18 @@
   <script>
     const dateInput = document.getElementById('dateInput');
     const result = document.getElementById('result');
+    const openPointEl = document.getElementById('openPoint');
 
-    function render() {
+    function renderAll() {
       if (!dateInput.value) {
         result.textContent = '';
+        openPointEl.innerHTML = '';
         return;
       }
       const [y, m, d] = dateInput.value.split('-').map(Number);
       result.textContent = getBinom(new Date(y, m - 1, d));
-    }
 
-    dateInput.addEventListener('input', render);
-
-    const today = new Date();
-    dateInput.value = today.toISOString().slice(0, 10);
-    render();
-
-    const openPointEl = document.getElementById('openPoint');
-
-    function renderOpenPoint() {
-      const p = getOpenPointNow();
+      const p = getOpenPointNow({ year: y, month: m, day: d });
       openPointEl.innerHTML = `
         <div class="meta">Prague time ${p.pragueTime} (${p.isSummer ? 'summer' : 'winter'}) · heaven stem ${p.heavenStem} · meridian ${p.meridianLetter} – ${p.organ}</div>
         <div class="row">Woman: point ${p.point} on meridian ${p.meridianLetter}, ${p.woman}</div>
@@ -88,8 +80,12 @@
       `;
     }
 
-    renderOpenPoint();
-    setInterval(renderOpenPoint, 1000);
+    dateInput.addEventListener('input', renderAll);
+
+    const today = new Date();
+    dateInput.value = today.toISOString().slice(0, 10);
+    renderAll();
+    setInterval(renderAll, 1000);
   </script>
 </body>
 </html>
