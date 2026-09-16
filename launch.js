@@ -10,7 +10,7 @@
     {
       "name": "sujok-calendar",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8643", "--bind", "127.0.0.1", "--directory", "sujok-calendar"],
+      "runtimeArgs": ["-m", "http.server", "8643", "--bind", "127.0.0.1", "--directory", "Time-energy"],
       "port": 8643
     }
   ]
