@@ -8,7 +8,7 @@
       "port": 8642
     },
     {
-      "name": "sujok-calendar",
+      "name": "time-energy",
       "runtimeExecutable": "python3",
       "runtimeArgs": ["-m", "http.server", "8643", "--bind", "127.0.0.1", "--directory", "Time-energy"],
       "port": 8643
