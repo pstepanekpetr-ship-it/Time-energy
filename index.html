@@ -74,7 +74,7 @@
 
       const p = getOpenPointNow({ year: y, month: m, day: d });
       openPointEl.innerHTML = `
-        <div class="meta">Prague time ${p.pragueTime} (${p.isSummer ? 'summer' : 'winter'}) · heaven stem ${p.heavenStem} · meridian ${p.meridianLetter} – ${p.organ}</div>
+        <div class="meta">Prague time ${p.pragueTime} (${p.isSummer ? 'summer' : 'winter'}) · heaven stem ${p.heavenStem} · meridian ${p.meridianLetter} – ${p.organ} · active ${p.activeRange}</div>
         <div class="row">Woman: point ${p.point} on meridian ${p.meridianLetter}, ${p.woman}</div>
         <div class="row">Man: point ${p.point} on meridian ${p.meridianLetter}, ${p.man}</div>
       `;
