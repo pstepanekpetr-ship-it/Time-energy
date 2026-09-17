@@ -52,11 +52,31 @@
     gap: 4px;
     cursor: pointer;
   }
-  input[type="date"] {
+  input[type="date"], #periodSelect {
     font-size: 1.2rem;
     padding: 8px 12px;
     border-radius: 8px;
     border: 1px solid #888;
+    background: transparent;
+    color: inherit;
+  }
+  #pickers {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  #nowButton {
+    font-size: 1.2rem;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid #888;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+  #nowButton[hidden] {
+    display: none;
   }
   #result {
     font-size: 4rem;
@@ -128,7 +148,11 @@
     <button type="button" data-lang="cs">🇨🇿</button>
   </div>
 
-  <input type="date" id="dateInput">
+  <div id="pickers">
+    <input type="date" id="dateInput">
+    <select id="periodSelect"></select>
+    <button type="button" id="nowButton" hidden></button>
+  </div>
   <div id="result"></div>
 
   <div id="genderFilter">
@@ -150,11 +174,13 @@
         pragueTime: 'Prague time', heavenStem: 'heaven stem', meridian: 'meridian', active: 'active',
         summer: 'summer', winter: 'winter', point: 'point', onMeridian: 'on meridian', hand: 'hand',
         left: 'left', right: 'right', palmar: 'palmar', dorsal: 'dorsal', index: 'index', middle: 'middle', fingerWord: 'finger',
+        now: 'Now',
       },
       cs: {
         pragueTime: 'Pražský čas', heavenStem: 'nebeský kmen', meridian: 'meridián', active: 'aktivní',
         summer: 'letní', winter: 'zimní', point: 'bod', onMeridian: 'na meridiánu', hand: 'ruka',
         left: 'levá', right: 'pravá', palmar: 'dlaňová strana', dorsal: 'hřbetní strana', index: 'ukazovák', middle: 'prostředník', fingerWord: '',
+        now: 'Teď',
       },
     };
 
@@ -181,15 +207,42 @@
     }
 
     const dateInput = document.getElementById('dateInput');
+    const periodSelect = document.getElementById('periodSelect');
+    const nowButton = document.getElementById('nowButton');
     const result = document.getElementById('result');
     const openPointEl = document.getElementById('openPoint');
     const diagramsEl = document.getElementById('diagrams');
     const langButtons = document.querySelectorAll('#langSwitch button');
     const genderRadios = document.querySelectorAll('#genderFilter input[type="radio"]');
     let genderFilter = null; // null = both, otherwise 'woman' or 'man'
+    let periodManuallySet = false; // false = period select just follows real time
+
+    function currentCivilDate() {
+      const [year, month, day] = dateInput.value.split('-').map(Number);
+      return { year, month, day };
+    }
+
+    // Rebuilds the period dropdown's labels for the selected date's summer/winter
+    // status, keeping whichever block index was already selected.
+    function refreshPeriodOptions() {
+      const prevIndex = periodSelect.value;
+      const { labels } = getPeriodOptions(currentCivilDate());
+      periodSelect.innerHTML = labels.map((label, i) => `<option value="${i}">${label}</option>`).join('');
+      if (prevIndex !== '') periodSelect.value = prevIndex;
+    }
+
+    // True when the date + period shown are exactly the real current date/time slot.
+    function isAtNow() {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      if (dateInput.value !== todayStr) return false;
+      const live = getOpenPointNow();
+      return Number(periodSelect.value) === live.blockIndex;
+    }
 
     function renderAll() {
       langButtons.forEach((btn) => btn.classList.toggle('active', btn.dataset.lang === lang));
+      nowButton.textContent = I18N[lang].now;
+      nowButton.hidden = isAtNow();
 
       if (!dateInput.value) {
         result.textContent = '';
@@ -201,7 +254,8 @@
       const [y, m, d] = dateInput.value.split('-').map(Number);
       result.textContent = getBinom(new Date(y, m - 1, d));
 
-      const p = getOpenPointNow({ year: y, month: m, day: d });
+      const p = getOpenPointNow({ year: y, month: m, day: d }, periodManuallySet ? Number(periodSelect.value) : null);
+      if (!periodManuallySet) periodSelect.value = String(p.blockIndex);
       const organ = lang === 'cs' ? p.organCs : p.organ;
       const seasonWord = p.isSummer ? t.summer : t.winter;
 
@@ -263,10 +317,26 @@
       });
     });
 
-    dateInput.addEventListener('input', renderAll);
+    dateInput.addEventListener('input', () => {
+      refreshPeriodOptions();
+      renderAll();
+    });
+
+    periodSelect.addEventListener('change', () => {
+      periodManuallySet = true;
+      renderAll();
+    });
+
+    nowButton.addEventListener('click', () => {
+      dateInput.value = new Date().toISOString().slice(0, 10);
+      periodManuallySet = false;
+      refreshPeriodOptions();
+      renderAll();
+    });
 
     const today = new Date();
     dateInput.value = today.toISOString().slice(0, 10);
+    refreshPeriodOptions();
     renderAll();
     setInterval(renderAll, 1000);
   </script>
