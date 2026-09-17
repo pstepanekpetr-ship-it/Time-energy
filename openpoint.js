@@ -3,18 +3,18 @@
 // summerRange/winterRange are [startHour, endHour] in 24h Prague local time;
 // endHour may be <= startHour to mean it wraps past midnight.
 const BYOL_ROWS = [
-  { letter: 'k', organEn: 'gallbladder', summerRange: [0, 2], winterRange: [23, 1], values: ['S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5'] },
-  { letter: 'l', organEn: 'liver', summerRange: [2, 4], winterRange: [1, 3], values: ['N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5'] },
-  { letter: 'a', organEn: 'lungs', summerRange: [4, 6], winterRange: [3, 5], values: ['N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1'] },
-  { letter: 'b', organEn: 'large intestine', summerRange: [6, 8], winterRange: [5, 7], values: ['S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1'] },
-  { letter: 'c', organEn: 'stomach', summerRange: [8, 10], winterRange: [7, 9], values: ['S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2'] },
-  { letter: 'd', organEn: 'pancreas/spleen', summerRange: [10, 12], winterRange: [9, 11], values: ['N-3', 'S-4', 'N-5', 'S-1', 'S-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2'] },
-  { letter: 'e', organEn: 'heart', summerRange: [12, 14], winterRange: [11, 13], values: ['N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3'] },
-  { letter: 'f', organEn: 'small intestine', summerRange: [14, 16], winterRange: [13, 15], values: ['S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3'] },
-  { letter: 'g', organEn: 'urinary bladder', summerRange: [16, 18], winterRange: [15, 17], values: ['S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4'] },
-  { letter: 'h', organEn: 'kidney', summerRange: [18, 20], winterRange: [17, 19], values: ['N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4'] },
-  { letter: 'i', organEn: 'brain', summerRange: [20, 22], winterRange: [19, 21], values: ['N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5'] },
-  { letter: 'j', organEn: 'spinal cord', summerRange: [22, 24], winterRange: [21, 23], values: ['S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5'] },
+  { letter: 'k', organEn: 'gallbladder', organCs: 'žlučník', summerRange: [0, 2], winterRange: [23, 1], values: ['S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5'] },
+  { letter: 'l', organEn: 'liver', organCs: 'játra', summerRange: [2, 4], winterRange: [1, 3], values: ['N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5'] },
+  { letter: 'a', organEn: 'lungs', organCs: 'plíce', summerRange: [4, 6], winterRange: [3, 5], values: ['N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1'] },
+  { letter: 'b', organEn: 'large intestine', organCs: 'tlusté střevo', summerRange: [6, 8], winterRange: [5, 7], values: ['S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1'] },
+  { letter: 'c', organEn: 'stomach', organCs: 'žaludek', summerRange: [8, 10], winterRange: [7, 9], values: ['S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2'] },
+  { letter: 'd', organEn: 'pancreas/spleen', organCs: 'slinivka, slezina', summerRange: [10, 12], winterRange: [9, 11], values: ['N-3', 'S-4', 'N-5', 'S-1', 'S-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2'] },
+  { letter: 'e', organEn: 'heart', organCs: 'srdce', summerRange: [12, 14], winterRange: [11, 13], values: ['N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3'] },
+  { letter: 'f', organEn: 'small intestine', organCs: 'tenké střevo', summerRange: [14, 16], winterRange: [13, 15], values: ['S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3'] },
+  { letter: 'g', organEn: 'urinary bladder', organCs: 'močový měchýř', summerRange: [16, 18], winterRange: [15, 17], values: ['S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4'] },
+  { letter: 'h', organEn: 'kidney', organCs: 'ledvina', summerRange: [18, 20], winterRange: [17, 19], values: ['N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4'] },
+  { letter: 'i', organEn: 'brain', organCs: 'mozek', summerRange: [20, 22], winterRange: [19, 21], values: ['N-1', 'S-2', 'N-3', 'S-4', 'N-5', 'S-1', 'N-2', 'S-3', 'N-4', 'S-5'] },
+  { letter: 'j', organEn: 'spinal cord', organCs: 'mícha', summerRange: [22, 24], winterRange: [21, 23], values: ['S-1', 'N-2', 'S-3', 'N-4', 'S-5', 'N-1', 'S-2', 'N-3', 'S-4', 'N-5'] },
 ];
 
 function formatHourRange([start, end]) {
@@ -58,13 +58,26 @@ function getPragueUtcOffsetHours(date, pragueParts) {
   return Math.round(offsetMs / 3600000);
 }
 
-// Returns the open-point result for the current time in Prague.
-// Pass civilDateOverride ({year, month, day}, month 1-based) to use a different day's
-// heaven stem while still using the real current Prague time of day.
-function getOpenPointNow(civilDateOverride) {
+// Whether the given civil date ({year, month, day}, month 1-based) falls in Prague
+// summer (DST) time — checked at 10:00 UTC on that date, safely away from the day's
+// own start/end so the answer isn't ambiguous for a date's boundary instants.
+function isPragueSummerTimeForDate({ year, month, day }) {
+  const probe = new Date(Date.UTC(year, month - 1, day, 10, 0, 0));
+  const parts = getPragueDateTimeParts(probe);
+  return getPragueUtcOffsetHours(probe, parts) === 2;
+}
+
+// Returns the open-point result for Prague.
+// civilDateOverride ({year, month, day}, month 1-based): use a different day's heaven
+// stem instead of today's.
+// blockIndexOverride (0-11): use this two-hour block (index into BYOL_ROWS, and into the
+// options from getPeriodOptions) instead of the current real-time block. Its summer/winter
+// meaning follows civilDateOverride's (or, absent that, today's) actual DST status — not
+// necessarily the current moment's, since the two can differ from the chosen date.
+function getOpenPointNow(civilDateOverride, blockIndexOverride) {
   const now = new Date();
   const { year, month, day, hour, minute, second } = getPragueDateTimeParts(now);
-  const isSummer = getPragueUtcOffsetHours(now, { year, month, day, hour, minute, second }) === 2;
+  const liveIsSummer = getPragueUtcOffsetHours(now, { year, month, day, hour, minute, second }) === 2;
 
   const civilDate = civilDateOverride
     ? new Date(civilDateOverride.year, civilDateOverride.month - 1, civilDateOverride.day)
@@ -73,9 +86,14 @@ function getOpenPointNow(civilDateOverride) {
   const heavenStem = biom[0];
   const heavenStemIndex = HEAVEN_STEM_CYCLE.indexOf(heavenStem);
 
-  const blockIndex = isSummer
-    ? Math.floor(hour / 2)
-    : Math.floor(((hour + 1) % 24) / 2);
+  let isSummer, blockIndex;
+  if (blockIndexOverride != null) {
+    isSummer = civilDateOverride ? isPragueSummerTimeForDate(civilDateOverride) : liveIsSummer;
+    blockIndex = blockIndexOverride;
+  } else {
+    isSummer = liveIsSummer;
+    blockIndex = isSummer ? Math.floor(hour / 2) : Math.floor(((hour + 1) % 24) / 2);
+  }
   const row = BYOL_ROWS[blockIndex];
 
   const [matchLetter, pointStr] = row.values[heavenStemIndex].split('-');
@@ -87,10 +105,12 @@ function getOpenPointNow(civilDateOverride) {
   return {
     pragueTime: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`,
     isSummer,
+    blockIndex,
     biom,
     heavenStem,
     meridianLetter: row.letter,
     organ: row.organEn,
+    organCs: row.organCs,
     activeRange,
     match: matchLetter,
     point,
@@ -99,6 +119,16 @@ function getOpenPointNow(civilDateOverride) {
   };
 }
 
+// Returns the 12 period labels (e.g. "0-2, 2-4, ..." or "23-1, 1-3, ...") appropriate
+// for the given civil date's summer/winter status, in BYOL_ROWS/blockIndex order.
+function getPeriodOptions(civilDate) {
+  const isSummer = isPragueSummerTimeForDate(civilDate);
+  return {
+    isSummer,
+    labels: BYOL_ROWS.map((row) => formatHourRange(isSummer ? row.summerRange : row.winterRange)),
+  };
+}
+
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { getOpenPointNow, BYOL_ROWS };
+  module.exports = { getOpenPointNow, getPeriodOptions, isPragueSummerTimeForDate, BYOL_ROWS };
 }
